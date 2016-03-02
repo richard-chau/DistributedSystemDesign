@@ -1,0 +1,44 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1348\cocoasubrtf170
+{\fonttbl\f0\froman\fcharset0 TimesNewRomanPSMT;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue255;}
+{\info
+{\author Tim}}\vieww14460\viewh13280\viewkind1\viewscale120
+\deftab720
+\pard\tqr\tx8640\pardeftab720\ri0
+
+\f0\fs24 \cf0 \expnd0\expndtw0\kerning0
+Haoyang Yuan	15-640 / PIT\
+haoyangy	02/05/2016\
+\pard\pardeftab720\ri0\qc
+\cf0 \expnd0\expndtw0\kerning0
+Report for Project1\
+\pard\pardeftab720\ri0
+\cf0 \expnd0\expndtw0\kerning0
+\
+Serialization\
+	According to the TA post at Piazza, I would like to use two struct for client request serialization and send them each once. A first header structure with constant size will contains the message length and the operation type \{opcode, total length\}. The server will continue to receive this kind of header packet. The second header, which should contains all the parameters of operation \{open for example: flag, mode, file_len, file_name\}. If the parameter is a string, the last member of structure is defined as \'93unsigned data char[0]\'94, which has a length of 0 and will points to the following string.   \
+\pard\tx720\pardeftab720
+\cf0 \expnd0\expndtw0\kerning0
+typedef\expnd0\expndtw0\kerning0
+ \expnd0\expndtw0\kerning0
+struct				typedef struct\expnd0\expndtw0\kerning0
+\
+\{  int opcode;					\{int filename_len;		\
+    \expnd0\expndtw0\kerning0
+int\expnd0\expndtw0\kerning0
+ total_len;			unsigned char data[0]; \
+    \expnd0\expndtw0\kerning0
+unsigned\expnd0\expndtw0\kerning0
+ \expnd0\expndtw0\kerning0
+char\expnd0\expndtw0\kerning0
+ data[0]; 		\} gettree_request_header_t;\
+\} request_header_t;\
+\
+\pard\pardeftab720\ri0
+\cf0 \expnd0\expndtw0\kerning0
+Deserialization\
+	The Server will first gets the header packet to know how many space is needed to malloc for the next step. And the Server will create the space with a specific operation structure pointer. Thus it can use structure member to invoke all the receiving data with their correct relative positions. For the client, it will use a constant space for some functions which will only return value and errno, and for other complicated return data, it will do the job as previous.\
+\
+Tree Serialization and Deserialization\
+	I will use BFS to traverse the tree structure. And do the following serialization for each node. I will use a queue to store each node, and use BFS to get the sons of each node. I will add sons to the queue, whenever I pop out a node. And for each node I will store the \{length of name, name, number of sons\}, in the serialization process to map them in to a string for transmit. The descendent relationship is contained in the queue sequence.\
+	When deserialization from the string, I will set up a queue first. Since I can read the first int to get the length of the name, and then read out the name, the next int should be the number of sons. Thus I can create a new node to simulate the original node on server. Since I know the number of sons, I should know how many nodes from now on in the string are the sons of first one. So I create the empty nodes and set up the descendent relationship with the previous node as sons. Finally I put them in the queue, to wait for pop out and fill the the information from Transmitted string. After all the loops while no more nodes in the queue, the first node should be the root of all tree structure.}
